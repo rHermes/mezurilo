@@ -1,4 +1,4 @@
-package no.spaeren.thesis.benchmarks.beam;
+package no.spaeren.thesis.benchmarks.beam.helpers;
 
 import org.apache.beam.sdk.transforms.DoFn;
 
