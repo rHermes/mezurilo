@@ -1,8 +1,10 @@
 package no.spaeren.thesis;
 
 import no.spaeren.thesis.benchmarks.beam.BeamSimple;
+import no.spaeren.thesis.benchmarks.beam.BeamSimpleWindow;
 import no.spaeren.thesis.benchmarks.flink.FlinkNumOperators;
 import no.spaeren.thesis.benchmarks.flink.FlinkSimple;
+import no.spaeren.thesis.benchmarks.flink.FlinkSimpleWindow;
 import no.spaeren.thesis.benchmarks.flink.FlinkWatermark;
 import picocli.CommandLine;
 
@@ -12,7 +14,8 @@ import picocli.CommandLine;
         version = "1.0",
         mixinStandardHelpOptions = true,
         subcommands = {
-                FlinkSimple.class, BeamSimple.class, FlinkWatermark.class, FlinkNumOperators.class,
+                FlinkSimple.class, FlinkWatermark.class, FlinkNumOperators.class,
+                FlinkSimpleWindow.class, BeamSimpleWindow.class, BeamSimple.class,
         }
 )
 public class App {

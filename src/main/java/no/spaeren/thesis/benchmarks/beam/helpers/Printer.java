@@ -11,6 +11,9 @@ public class Printer<T> extends DoFn<T, Void> {
 
     @ProcessElement
     public void processElement(ProcessContext c) {
+
+
         System.out.printf(this.fmtstr, c.element());
+        System.out.flush();
     }
 }

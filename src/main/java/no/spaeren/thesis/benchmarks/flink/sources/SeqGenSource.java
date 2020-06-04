@@ -52,7 +52,7 @@ public class SeqGenSource extends RichParallelSourceFunction<Long> implements Ch
 
         this.checkpointedState = context.getOperatorStateStore().getListState(
                 new ListStateDescriptor<>(
-                        "stateful-sequence-source-state",
+                        "seq-gen-source-state",
                         TypeInformation.of(new TypeHint<Tuple4<Long, Long, Long, Long>>() {
                         })
                 )
@@ -75,10 +75,6 @@ public class SeqGenSource extends RichParallelSourceFunction<Long> implements Ch
             final int toCollect = (totalNoOfElements % stepSize > taskIdx) ? baseSize + 1 : baseSize;
 
             this.valuesToEmit.add(Tuple4.of(0L, congruence, (long) stepSize, (long) toCollect));
-
-//            for (long collected = 0; collected < toCollect; collected++) {
-//                this.valuesToEmit.add(collected * stepSize + congruence);
-//            }
         }
     }
 
