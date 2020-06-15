@@ -70,7 +70,7 @@ public class SeqGenSource extends RichParallelSourceFunction<Long> implements Ch
             final int taskIdx = getRuntimeContext().getIndexOfThisSubtask();
             final long congruence = start + taskIdx;
 
-            long totalNoOfElements = Math.abs(end - start + 1);
+            long totalNoOfElements = Math.abs(end - start);
             final int baseSize = safeDivide(totalNoOfElements, stepSize);
             final int toCollect = (totalNoOfElements % stepSize > taskIdx) ? baseSize + 1 : baseSize;
 

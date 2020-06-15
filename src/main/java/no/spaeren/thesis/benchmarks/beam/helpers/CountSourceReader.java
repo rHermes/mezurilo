@@ -46,7 +46,7 @@ public class CountSourceReader extends UnboundedSource.UnboundedReader<Long> {
      */
     @Override
     public boolean start() throws IOException {
-        this.current = this.from;
+        this.current = this.from - 1;
         this.done = false;
         return this.advance();
     }

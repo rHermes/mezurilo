@@ -5,18 +5,15 @@ import no.spaeren.thesis.benchmarks.beam.helpers.Printer;
 import org.apache.beam.runners.flink.FlinkPipelineOptions;
 import org.apache.beam.runners.flink.FlinkRunner;
 import org.apache.beam.sdk.Pipeline;
-import org.apache.beam.sdk.PipelineResult;
 import org.apache.beam.sdk.io.Read;
 import org.apache.beam.sdk.options.PipelineOptionsFactory;
-import org.apache.beam.sdk.transforms.Combine;
-import org.apache.beam.sdk.transforms.Count;
+import org.apache.beam.sdk.transforms.Filter;
+import org.apache.beam.sdk.transforms.MapElements;
 import org.apache.beam.sdk.transforms.ParDo;
-import org.apache.beam.sdk.transforms.windowing.FixedWindows;
-import org.apache.beam.sdk.transforms.windowing.Window;
 import org.apache.beam.sdk.values.PCollection;
+import org.apache.beam.sdk.values.TypeDescriptors;
 import picocli.CommandLine;
 
-import java.time.Duration;
 import java.util.concurrent.Callable;
 
 @CommandLine.Command(name = "BeamNumOperators", mixinStandardHelpOptions = true,
@@ -29,8 +26,9 @@ public class BeamNumOperators implements Callable<Void> {
     @CommandLine.Option(names = {"--to"}, defaultValue = "100000000")
     final Long to = 100000000L;
 
-    @CommandLine.Option(names = {"--window-duration"}, defaultValue = "PT5S", description = "The size of the tumbling window")
-    final Duration windowDuration = Duration.ofSeconds(5);
+
+    @CommandLine.Option(names = {"--nodes"}, defaultValue = "1", description = "Number of operator nodes")
+    final Long numberOfOperators = 1L;
 
 
     @Override
@@ -38,37 +36,21 @@ public class BeamNumOperators implements Callable<Void> {
         FlinkPipelineOptions options = PipelineOptionsFactory.create().as(FlinkPipelineOptions.class);
         options.setDisableMetrics(true);
         options.setRunner(FlinkRunner.class);
-        options.setShutdownSourcesAfterIdleMs(100L);
+        options.setJobName("BeamNumOperators");
+        // options.setShutdownSourcesAfterIdleMs(100L);
         Pipeline p = Pipeline.create(options);
 
-        PCollection<Long> pp = p.apply(Read.from(new CountSource()));
+        PCollection<Long> stopup = p
+                .apply(Read.from(new CountSource(this.from, this.to)));
 
-
-        // GenerateSequence gs = GenerateSequence.from(0).to(100000000).withRate(100, org.joda.time.Duration.standardSeconds(1L));
-//
-//        p
-//                .apply(gs)
-//                .apply(Window.into(FixedWindows.of(org.joda.time.Duration.standardSeconds(5L))))
-//                .apply(Combine.globally(Count.<Long>combineFn()).withoutDefaults())
-//                .apply(MapElements.into(TypeDescriptors.strings()).via((Long x) -> x.toString()))
-//                .apply(TextIO.write().to("thiswont-work)"));
-
-        p
-                .apply(Read.from(new CountSource()))
-                .apply(Window.into(FixedWindows.of(org.joda.time.Duration.standardSeconds(5L))))
-                .apply(Combine.globally(Count.<Long>combineFn()).withoutDefaults())
-                .apply(ParDo.of(new Printer<>("BeamSimpleWindow: %d\n")));
-
-        System.out.println("BEFORE THE CRAZY!");
-        PipelineResult hgj = p.run();// .waitUntilFinish();
-        System.out.println("WE ARE HERE");
-        PipelineResult.State rstate = hgj.waitUntilFinish(org.joda.time.Duration.standardMinutes(1));
-        System.out.println("This is funny");
-        if (rstate == null) {
-            hgj.cancel();
+        for (long i = 0; i < this.numberOfOperators; i++) {
+            stopup = stopup.apply(MapElements.into(TypeDescriptors.longs()).via((Long l) -> l));
         }
-        System.out.println("HERE WE ARE AGAIN");
 
+        stopup.apply(Filter.equal(this.to - 1)).apply(ParDo.of(new Printer<>("BeamNumOperators: %d\n")));
+
+
+        p.run().waitUntilFinish();
 
         return null;
     }

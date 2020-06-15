@@ -45,8 +45,7 @@ public class FlinkNumOperators implements Callable<Void> {
         }
 
 
-
-        kov.filter(new OnlyOne<>(this.to)).print("FlinkNumOperators");
+        kov.filter(new OnlyOne<>(this.to - 1)).print("FlinkNumOperators");
 
         env.execute("FlinkNumOperators");
         return null;

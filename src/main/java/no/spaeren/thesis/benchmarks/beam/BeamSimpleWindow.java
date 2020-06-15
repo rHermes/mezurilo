@@ -5,8 +5,6 @@ import no.spaeren.thesis.benchmarks.beam.helpers.Printer;
 import org.apache.beam.runners.flink.FlinkPipelineOptions;
 import org.apache.beam.runners.flink.FlinkRunner;
 import org.apache.beam.sdk.Pipeline;
-import org.apache.beam.sdk.PipelineResult;
-import org.apache.beam.sdk.io.GenerateSequence;
 import org.apache.beam.sdk.io.Read;
 import org.apache.beam.sdk.options.PipelineOptionsFactory;
 import org.apache.beam.sdk.transforms.Combine;
@@ -38,36 +36,18 @@ public class BeamSimpleWindow implements Callable<Void> {
         FlinkPipelineOptions options = PipelineOptionsFactory.create().as(FlinkPipelineOptions.class);
         options.setDisableMetrics(true);
         options.setRunner(FlinkRunner.class);
+        options.setJobName("BeamSimpleWindow");
+        // options.setShutdownSourcesAfterIdleMs(100L);
         Pipeline p = Pipeline.create(options);
 
-
-
-
-
-        // GenerateSequence gs = GenerateSequence.from(0).to(100000000).withRate(100, org.joda.time.Duration.standardSeconds(1L));
-//
-//        p
-//                .apply(gs)
-//                .apply(Window.into(FixedWindows.of(org.joda.time.Duration.standardSeconds(5L))))
-//                .apply(Combine.globally(Count.<Long>combineFn()).withoutDefaults())
-//                .apply(MapElements.into(TypeDescriptors.strings()).via((Long x) -> x.toString()))
-//                .apply(TextIO.write().to("thiswont-work)"));
-
         p
-                .apply(Read.from(new CountSource()))
-                .apply(Window.into(FixedWindows.of(org.joda.time.Duration.standardSeconds(5L))))
+                .apply(Read.from(new CountSource(this.from, this.to)))
+                .apply(Window.into(FixedWindows.of(org.joda.time.Duration.millis(this.windowDuration.toMillis()))))
                 .apply(Combine.globally(Count.<Long>combineFn()).withoutDefaults())
                 .apply(ParDo.of(new Printer<>("BeamSimpleWindow: %d\n")));
 
-        System.out.println("BEFORE THE CRAZY!");
-        PipelineResult hgj = p.run();// .waitUntilFinish();
-        System.out.println("WE ARE HERE");
-        PipelineResult.State rstate = hgj.waitUntilFinish(org.joda.time.Duration.standardMinutes(1));
-        System.out.println("This is funny");
-        if (rstate == null) {
-            hgj.cancel();
-        }
-        System.out.println("HERE WE ARE AGAIN");
+
+        p.run().waitUntilFinish();
 
 
         return null;

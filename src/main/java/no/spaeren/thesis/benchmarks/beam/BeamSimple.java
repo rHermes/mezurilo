@@ -30,7 +30,7 @@ public class BeamSimple implements Callable<Void> {
         FlinkPipelineOptions options = PipelineOptionsFactory.create().as(FlinkPipelineOptions.class);
         options.setDisableMetrics(true);
         options.setRunner(FlinkRunner.class);
-        options.setShutdownSourcesAfterIdleMs(100L);
+        // options.setShutdownSourcesAfterIdleMs(100L);
         // options.setParallelism(2);
         Pipeline p = Pipeline.create(options);
 
