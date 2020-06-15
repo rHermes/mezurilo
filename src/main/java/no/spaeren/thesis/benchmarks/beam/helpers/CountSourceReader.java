@@ -1,6 +1,7 @@
 package no.spaeren.thesis.benchmarks.beam.helpers;
 
 import org.apache.beam.sdk.io.UnboundedSource;
+import org.apache.beam.sdk.transforms.windowing.BoundedWindow;
 import org.apache.beam.sdk.transforms.windowing.Trigger;
 import org.apache.beam.sdk.transforms.windowing.Window;
 import org.joda.time.Duration;
@@ -15,6 +16,7 @@ public class CountSourceReader extends UnboundedSource.UnboundedReader<Long> {
 
     private Long current;
     private Instant currentTimestamp;
+    private Boolean done;
 
     public CountSourceReader(CountSource countSource) {
         this.countSource = countSource;
@@ -38,6 +40,7 @@ public class CountSourceReader extends UnboundedSource.UnboundedReader<Long> {
     @Override
     public boolean start() throws IOException {
         this.current = 0L;
+        this.done = false;
         return this.advance();
     }
 
@@ -50,9 +53,20 @@ public class CountSourceReader extends UnboundedSource.UnboundedReader<Long> {
      */
     @Override
     public boolean advance() throws IOException {
-        this.current = this.current + 1;
         this.currentTimestamp = Instant.now();
-        return true;
+
+        if (!this.done && this.current > 10000) {
+            this.done = true;
+            // this.current = null;
+            // this.currentTimestamp = null;
+        }
+
+        if (!this.done) {
+            this.current = this.current + 1;
+            // this.currentTimestamp = Instant.now();
+        }
+
+        return !this.done;
     }
 
     /**
@@ -68,7 +82,7 @@ public class CountSourceReader extends UnboundedSource.UnboundedReader<Long> {
      */
     @Override
     public Long getCurrent() throws NoSuchElementException {
-        if (this.current == null) {
+        if (this.current == null || this.done) {
             throw new NoSuchElementException();
         }
         return this.current;
@@ -89,7 +103,7 @@ public class CountSourceReader extends UnboundedSource.UnboundedReader<Long> {
      */
     @Override
     public Instant getCurrentTimestamp() throws NoSuchElementException {
-        if (this.currentTimestamp == null) {
+        if (this.currentTimestamp == null || this.done) {
             throw new NoSuchElementException();
         }
         return this.currentTimestamp;

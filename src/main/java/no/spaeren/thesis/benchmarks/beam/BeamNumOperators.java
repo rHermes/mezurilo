@@ -6,7 +6,6 @@ import org.apache.beam.runners.flink.FlinkPipelineOptions;
 import org.apache.beam.runners.flink.FlinkRunner;
 import org.apache.beam.sdk.Pipeline;
 import org.apache.beam.sdk.PipelineResult;
-import org.apache.beam.sdk.io.GenerateSequence;
 import org.apache.beam.sdk.io.Read;
 import org.apache.beam.sdk.options.PipelineOptionsFactory;
 import org.apache.beam.sdk.transforms.Combine;
@@ -14,14 +13,15 @@ import org.apache.beam.sdk.transforms.Count;
 import org.apache.beam.sdk.transforms.ParDo;
 import org.apache.beam.sdk.transforms.windowing.FixedWindows;
 import org.apache.beam.sdk.transforms.windowing.Window;
+import org.apache.beam.sdk.values.PCollection;
 import picocli.CommandLine;
 
 import java.time.Duration;
 import java.util.concurrent.Callable;
 
-@CommandLine.Command(name = "BeamSimpleWindow", mixinStandardHelpOptions = true,
-        description = "A simple benchmark for windowing on beam")
-public class BeamSimpleWindow implements Callable<Void> {
+@CommandLine.Command(name = "BeamNumOperators", mixinStandardHelpOptions = true,
+        description = "A number of operators benchmark")
+public class BeamNumOperators implements Callable<Void> {
 
     @CommandLine.Option(names = {"--from"}, defaultValue = "0")
     final Long from = 0L;
@@ -38,10 +38,10 @@ public class BeamSimpleWindow implements Callable<Void> {
         FlinkPipelineOptions options = PipelineOptionsFactory.create().as(FlinkPipelineOptions.class);
         options.setDisableMetrics(true);
         options.setRunner(FlinkRunner.class);
+        options.setShutdownSourcesAfterIdleMs(100L);
         Pipeline p = Pipeline.create(options);
 
-
-
+        PCollection<Long> pp = p.apply(Read.from(new CountSource()));
 
 
         // GenerateSequence gs = GenerateSequence.from(0).to(100000000).withRate(100, org.joda.time.Duration.standardSeconds(1L));

@@ -12,6 +12,7 @@ import java.util.Collections;
 import java.util.List;
 
 public class CountSource extends UnboundedSource<Long, UnboundedSource.CheckpointMark> {
+
     /**
      * Returns a list of {@code UnboundedSource} objects representing the instances of this source
      * that should be used when executing the workflow. Each split should return a separate partition

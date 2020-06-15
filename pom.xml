@@ -21,8 +21,8 @@
         <maven-jar-plugin.version>3.2.0</maven-jar-plugin.version>
         <maven-shade-plugin.version>3.2.3</maven-shade-plugin.version>
 
-        <beam.version>2.20.0</beam.version>
-        <flink.version>1.9.3</flink.version>
+        <beam.version>2.22.0</beam.version>
+        <flink.version>1.10.1</flink.version>
 
         <picocli.version>4.3.0</picocli.version>
 
@@ -65,7 +65,7 @@
 
         <dependency>
             <groupId>org.apache.beam</groupId>
-            <artifactId>beam-runners-flink-1.9</artifactId>
+            <artifactId>beam-runners-flink-1.10</artifactId>
             <version>${beam.version}</version>
             <!--            <scope>runtime</scope>-->
         </dependency>
