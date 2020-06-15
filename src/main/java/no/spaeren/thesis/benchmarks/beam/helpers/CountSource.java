@@ -1,7 +1,6 @@
 package no.spaeren.thesis.benchmarks.beam.helpers;
 
 import org.apache.beam.sdk.coders.Coder;
-import org.apache.beam.sdk.coders.VarIntCoder;
 import org.apache.beam.sdk.coders.VarLongCoder;
 import org.apache.beam.sdk.io.UnboundedSource;
 import org.apache.beam.sdk.options.PipelineOptions;
@@ -12,6 +11,19 @@ import java.util.Collections;
 import java.util.List;
 
 public class CountSource extends UnboundedSource<Long, UnboundedSource.CheckpointMark> {
+
+    private final Long from;
+    private final Long to;
+
+    public CountSource() {
+        this.from = 0L;
+        this.to = Long.MAX_VALUE;
+    }
+
+    public CountSource(Long from, Long to) {
+        this.from = from;
+        this.to = to;
+    }
 
     /**
      * Returns a list of {@code UnboundedSource} objects representing the instances of this source
@@ -48,7 +60,7 @@ public class CountSource extends UnboundedSource<Long, UnboundedSource.Checkpoin
      */
     @Override
     public UnboundedReader<Long> createReader(PipelineOptions options, @Nullable CheckpointMark checkpointMark) throws IOException {
-        return new CountSourceReader(this);
+        return new CountSourceReader(this, this.from, this.to);
     }
 
     /**

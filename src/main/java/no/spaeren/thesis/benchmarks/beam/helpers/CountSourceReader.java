@@ -14,12 +14,19 @@ public class CountSourceReader extends UnboundedSource.UnboundedReader<Long> {
 
     private CountSource countSource;
 
+    private final Long from;
+    private final Long to;
+
     private Long current;
     private Instant currentTimestamp;
     private Boolean done;
 
-    public CountSourceReader(CountSource countSource) {
+
+    // The range is [from, to)
+    public CountSourceReader(CountSource countSource, Long from, Long to) {
         this.countSource = countSource;
+        this.from = from;
+        this.to = to;
     }
 
     /**
@@ -39,7 +46,7 @@ public class CountSourceReader extends UnboundedSource.UnboundedReader<Long> {
      */
     @Override
     public boolean start() throws IOException {
-        this.current = 0L;
+        this.current = this.from;
         this.done = false;
         return this.advance();
     }
@@ -55,7 +62,7 @@ public class CountSourceReader extends UnboundedSource.UnboundedReader<Long> {
     public boolean advance() throws IOException {
         this.currentTimestamp = Instant.now();
 
-        if (!this.done && this.current > 10000) {
+        if (!this.done && this.current >= this.to) {
             this.done = true;
             // this.current = null;
             // this.currentTimestamp = null;
@@ -142,7 +149,12 @@ public class CountSourceReader extends UnboundedSource.UnboundedReader<Long> {
      */
     @Override
     public Instant getWatermark() {
-        return this.currentTimestamp.minus(Duration.standardSeconds(1));
+        if (this.done) {
+            return BoundedWindow.TIMESTAMP_MAX_VALUE;
+        } else {
+            return this.currentTimestamp.minus(Duration.standardSeconds(1));
+        }
+
     }
 
     /**
