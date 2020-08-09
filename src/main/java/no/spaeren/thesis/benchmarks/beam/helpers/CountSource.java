@@ -7,6 +7,7 @@ import org.apache.beam.sdk.options.PipelineOptions;
 
 import javax.annotation.Nullable;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -48,7 +49,30 @@ public class CountSource extends UnboundedSource<Long, UnboundedSource.Checkpoin
      */
     @Override
     public List<? extends UnboundedSource<Long, CheckpointMark>> split(int desiredNumSplits, PipelineOptions options) throws Exception {
-        return Collections.singletonList(this);
+
+        if (desiredNumSplits < 2) {
+            return Collections.singletonList(this);
+        }
+        // We need to figure out when this is called
+        List sources = new ArrayList();
+
+        Long nums = this.to - this.from;
+        Long e = nums / desiredNumSplits;
+        Long o = nums % desiredNumSplits;
+
+        Long current = this.from;
+        for (int i = 0; i < desiredNumSplits; i++) {
+            Long span = e;
+            if (o > 0) {
+                span += 1;
+                o -= 1;
+            }
+
+            sources.add(new CountSource(current, current+span));
+            current += span;
+        }
+
+        return sources;
     }
 
     /**
