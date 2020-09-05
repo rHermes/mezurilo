@@ -11,7 +11,7 @@ public class OnlyOne extends DoFn<Long,Long> {
 
     @ProcessElement
     public void processElement(@Element Long in, OutputReceiver<Long> out) {
-        if (in == this.match) {
+        if (in.equals(this.match)) {
             out.output(in);
         }
     }
