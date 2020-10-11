@@ -34,9 +34,8 @@ public class FlinkWikipediaHistoryTopEditors implements Callable<Void> {
         // final String fileNameInput = "file:///home/rhermes/madsci/thesis/data/mediawiki_history/jjjj.tsv";
         final String fileNameInput = "file:///home/rhermes/madsci/thesis/data/mediawiki_history/2020-07.enwiki.2016-04.sorted.tsv";
         /// final DataStreamSource<String> linesIn = env.readTextFile("file:///home/rhermes/madsci/thesis/data/mediawiki_history/2020-07.enwiki.2016-04.tsv");
-        // final DataStreamSource<String> linesIn = env.readTextFile(fileNameInput);
+        final DataStreamSource<String> linesIn = env.readTextFile(fileNameInput);
 
-        final DataStream<String> linesIn = env.readFile
 
         final SingleOutputStreamOperator<Event> jj = linesIn.map(new MapFunction<String, Event>() {
             @Override
