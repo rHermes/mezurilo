@@ -42,12 +42,18 @@ public class BeamNumOperators implements Callable<Void> {
     @CommandLine.Option(names = {"--encoder"}, description = "Valid values: ${COMPLETION-CANDIDATES}")
     final PosEncoders posEncoder = PosEncoders.None;
 
+    @CommandLine.Option(names = {"--faster-copy"}, description = "Use the faster copy patch")
+    final Boolean useFasterCopy = false;
+
     @Override
     public Void call() throws Exception {
         FlinkPipelineOptions options = PipelineOptionsFactory.create().as(FlinkPipelineOptions.class);
         options.setDisableMetrics(true);
         options.setRunner(FlinkRunner.class);
+        options.setFasterCopy(useFasterCopy);
         options.setJobName("BeamNumOperators");
+
+        System.out.println(useFasterCopy);
         // options.setShutdownSourcesAfterIdleMs(100L);
         Pipeline p = Pipeline.create(options);
 
