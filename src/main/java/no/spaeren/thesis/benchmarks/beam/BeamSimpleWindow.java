@@ -30,13 +30,16 @@ public class BeamSimpleWindow implements Callable<Void> {
     @CommandLine.Option(names = {"--window-duration"}, defaultValue = "PT5S", description = "The size of the tumbling window")
     final Duration windowDuration = Duration.ofSeconds(5);
 
+    @CommandLine.Option(names = {"--name"}, defaultValue = "BeamSimpleWindow", description = "The name used in logging")
+    String name = "BeamSimpleWindow";
+
 
     @Override
     public Void call() throws Exception {
         FlinkPipelineOptions options = PipelineOptionsFactory.create().as(FlinkPipelineOptions.class);
         options.setDisableMetrics(true);
         options.setRunner(FlinkRunner.class);
-        options.setJobName("BeamSimpleWindow");
+        options.setJobName(name);
         // options.setShutdownSourcesAfterIdleMs(100L);
         Pipeline p = Pipeline.create(options);
 
@@ -44,7 +47,7 @@ public class BeamSimpleWindow implements Callable<Void> {
                 .apply(Read.from(new CountSource(this.from, this.to)))
                 .apply(Window.into(FixedWindows.of(org.joda.time.Duration.millis(this.windowDuration.toMillis()))))
                 .apply(Combine.globally(Count.<Long>combineFn()).withoutDefaults())
-                .apply(ParDo.of(new Printer<>("BeamSimpleWindow: %d\n")));
+                .apply(ParDo.of(new Printer<>(name + ": %d\n")));
 
 
         p.run().waitUntilFinish();

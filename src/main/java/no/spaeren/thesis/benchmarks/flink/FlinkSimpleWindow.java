@@ -23,9 +23,11 @@ public class FlinkSimpleWindow implements Callable<Void> {
     @CommandLine.Option(names = {"--event-time"})
     final Boolean useEventTime = false;
 
-
     @CommandLine.Option(names = {"--window-duration"}, defaultValue = "PT5S", description = "The size of the tumbling window")
     final Duration windowDuration = Duration.ofSeconds(5);
+
+    @CommandLine.Option(names = {"--name"}, defaultValue = "FlinkSimpleWindow", description = "The name used in logging")
+    String name = "FlinkSimpleWindow";
 
 
     @Override
@@ -38,9 +40,9 @@ public class FlinkSimpleWindow implements Callable<Void> {
 
         final DataStreamSource<Long> ds = env.addSource(new SeqGenSource(this.from, this.to));
 
-        ds.map(x -> 1).timeWindowAll(Time.milliseconds(this.windowDuration.toMillis())).sum(0).print("FlinkSimpleWindow");
+        ds.map(x -> 1).timeWindowAll(Time.milliseconds(this.windowDuration.toMillis())).sum(0).print(name);
 
-        env.execute("FlinkSimpleWindow");
+        env.execute(name);
         return null;
     }
 }
