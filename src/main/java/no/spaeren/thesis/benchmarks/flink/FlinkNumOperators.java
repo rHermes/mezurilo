@@ -7,6 +7,7 @@ import org.apache.flink.streaming.api.TimeCharacteristic;
 import org.apache.flink.streaming.api.datastream.DataStreamSource;
 import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
+import org.apache.flink.streaming.api.functions.IngestionTimeExtractor;
 import picocli.CommandLine;
 
 import java.util.concurrent.Callable;
@@ -39,6 +40,10 @@ public class FlinkNumOperators implements Callable<Void> {
         final DataStreamSource<Long> ds = env.addSource(new SeqGenSource(this.from, this.to));
 
         SingleOutputStreamOperator<Long> kov = ds;
+
+        if (this.useEventTime) {
+            kov = kov.assignTimestampsAndWatermarks(new IngestionTimeExtractor<>());
+        }
 
         for (long i = 0; i < this.numberOfOperators; i++) {
             kov = kov.map(new MapIdentity<>());

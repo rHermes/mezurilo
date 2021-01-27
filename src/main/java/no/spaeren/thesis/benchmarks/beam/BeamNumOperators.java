@@ -67,11 +67,9 @@ public class BeamNumOperators implements Callable<Void> {
                 .apply(Read.from(new CountSource(this.from, this.to)));
 
 
-
         for (long i = 0; i < this.numberOfOperators; i++) {
             stopup = stopup.apply(ParDo.of(new MapIdentity()));
         }
-
 
         stopup.apply(ParDo.of(new OnlyOne(this.to - 1))).apply(ParDo.of(new Printer<>("BeamNumOperators: %d\n")));
 

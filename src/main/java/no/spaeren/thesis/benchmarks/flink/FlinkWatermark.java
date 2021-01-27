@@ -5,6 +5,7 @@ import no.spaeren.thesis.benchmarks.flink.sources.SeqGenSource;
 import org.apache.flink.streaming.api.TimeCharacteristic;
 import org.apache.flink.streaming.api.datastream.DataStreamSource;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
+import org.apache.flink.streaming.api.functions.IngestionTimeExtractor;
 import picocli.CommandLine;
 
 import java.util.concurrent.Callable;
@@ -33,6 +34,9 @@ public class FlinkWatermark implements Callable<Void> {
             env.setStreamTimeCharacteristic(TimeCharacteristic.EventTime);
         }
         final DataStreamSource<Long> ds = env.addSource(new SeqGenSource(this.from, this.to));
+
+        ds.assignTimestampsAndWatermarks(new IngestionTimeExtractor<>());
+
         ds.filter(new OnlyOne<>(this.to)).print("FlinkWatermark");
 
         env.execute("FlinkWatermark");
