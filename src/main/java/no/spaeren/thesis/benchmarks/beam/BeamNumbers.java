@@ -4,18 +4,16 @@ import no.spaeren.thesis.benchmarks.beam.helpers.Printer;
 import org.apache.beam.runners.flink.FlinkPipelineOptions;
 import org.apache.beam.runners.flink.FlinkRunner;
 import org.apache.beam.sdk.Pipeline;
-import org.apache.beam.sdk.io.GenerateSequence;
 import org.apache.beam.sdk.io.kafka.KafkaIO;
-import org.apache.beam.sdk.io.kafka.KafkaRecord;
 import org.apache.beam.sdk.options.PipelineOptionsFactory;
 import org.apache.beam.sdk.transforms.Filter;
 import org.apache.beam.sdk.transforms.ParDo;
 import org.apache.beam.sdk.transforms.Values;
 import org.apache.beam.sdk.values.PCollection;
+import org.apache.kafka.common.serialization.LongDeserializer;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.joda.time.Duration;
 import picocli.CommandLine;
-import org.apache.kafka.common.serialization.LongDeserializer;
 
 import java.util.concurrent.Callable;
 
@@ -31,6 +29,9 @@ public class BeamNumbers implements Callable<Void> {
 
     @CommandLine.Option(names = {"--kafka-topic"}, description = "What is the name of the topic to connect to")
     String kafkaTopic = "";
+
+    @CommandLine.Option(names = {"--duration"}, defaultValue = "10", description = "How long the benchmark will run for, in minutes")
+    final Long durationMin = 10L;
 
     @Override
     public Void call() throws Exception {
@@ -48,7 +49,7 @@ public class BeamNumbers implements Callable<Void> {
                 .withTopic(kafkaTopic)
                 .withKeyDeserializer(LongDeserializer.class)
                 .withValueDeserializer(StringDeserializer.class)
-                .withMaxReadTime(Duration.standardMinutes(10))
+                .withMaxReadTime(Duration.standardMinutes(durationMin))
                 .withoutMetadata()
         ).apply(Values.<String>create());
 
@@ -60,7 +61,7 @@ public class BeamNumbers implements Callable<Void> {
 
         prins.apply(ParDo.of(new Printer<>("BeamNumbers: %s\n")));
 
-        p.run().waitUntilFinish();
+        p.run(); // .waitUntilFinish();
         return null;
     }
 }
