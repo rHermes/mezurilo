@@ -6,13 +6,20 @@ import org.apache.beam.runners.flink.FlinkPipelineOptions;
 import org.apache.beam.runners.flink.FlinkRunner;
 import org.apache.beam.sdk.Pipeline;
 import org.apache.beam.sdk.io.Read;
+import org.apache.beam.sdk.options.ExperimentalOptions;
+import org.apache.beam.sdk.options.PipelineOptions;
 import org.apache.beam.sdk.options.PipelineOptionsFactory;
 import org.apache.beam.sdk.transforms.MapElements;
 import org.apache.beam.sdk.transforms.ParDo;
 import org.apache.beam.sdk.values.PCollection;
 import org.apache.beam.sdk.values.TypeDescriptors;
+import org.checkerframework.checker.initialization.qual.Initialized;
+import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.UnknownKeyFor;
 import picocli.CommandLine;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.Callable;
 
 @CommandLine.Command(name = "BeamSimple", mixinStandardHelpOptions = true, description = "A simple beam job")
@@ -27,7 +34,14 @@ public class BeamSimple implements Callable<Void> {
 
     @Override
     public Void call() {
-        FlinkPipelineOptions options = PipelineOptionsFactory.create().as(FlinkPipelineOptions.class);
+        ExperimentalOptions eopts = PipelineOptionsFactory.create().as(ExperimentalOptions.class);
+        List<String> experiments = new ArrayList<>();
+        experiments.add("use_deprecated_read");
+        eopts.setExperiments(experiments);
+        // FlinkPipelineOptions options = PipelineOptionsFactory.create().as(FlinkPipelineOptions.class);
+        FlinkPipelineOptions options = eopts.as(FlinkPipelineOptions.class);
+
+
         options.setDisableMetrics(true);
         options.setRunner(FlinkRunner.class);
         // options.setShutdownSourcesAfterIdleMs(100L);

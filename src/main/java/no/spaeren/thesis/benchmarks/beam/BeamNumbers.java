@@ -5,6 +5,7 @@ import org.apache.beam.runners.flink.FlinkPipelineOptions;
 import org.apache.beam.runners.flink.FlinkRunner;
 import org.apache.beam.sdk.Pipeline;
 import org.apache.beam.sdk.io.kafka.KafkaIO;
+import org.apache.beam.sdk.options.ExperimentalOptions;
 import org.apache.beam.sdk.options.PipelineOptionsFactory;
 import org.apache.beam.sdk.transforms.Filter;
 import org.apache.beam.sdk.transforms.ParDo;
@@ -15,6 +16,8 @@ import org.apache.kafka.common.serialization.StringDeserializer;
 import org.joda.time.Duration;
 import picocli.CommandLine;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.Callable;
 
 @CommandLine.Command(name = "BeamNumbers", mixinStandardHelpOptions = true,
@@ -35,7 +38,13 @@ public class BeamNumbers implements Callable<Void> {
 
     @Override
     public Void call() throws Exception {
-        FlinkPipelineOptions options = PipelineOptionsFactory.create().as(FlinkPipelineOptions.class);
+        ExperimentalOptions eopts = PipelineOptionsFactory.create().as(ExperimentalOptions.class);
+        List<String> experiments = new ArrayList<>();
+        experiments.add("use_deprecated_read");
+        eopts.setExperiments(experiments);
+        // FlinkPipelineOptions options = PipelineOptionsFactory.create().as(FlinkPipelineOptions.class);
+        FlinkPipelineOptions options = eopts.as(FlinkPipelineOptions.class);
+        //FlinkPipelineOptions options = PipelineOptionsFactory.create().as(FlinkPipelineOptions.class);
         options.setDisableMetrics(true);
         options.setRunner(FlinkRunner.class);
         options.setFasterCopy(useFasterCopy);
